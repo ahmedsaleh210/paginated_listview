@@ -5,7 +5,6 @@ import 'package:flutter_base/src/config/res/color_manager.dart';
 import 'package:flutter_base/src/core/error/failure.dart';
 import 'package:flutter_base/src/core/extensions/sized_box_helper.dart';
 import 'package:flutter_base/src/core/shared/base_state.dart';
-import 'package:flutter_base/src/core/shared/models/list_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:multiple_result/multiple_result.dart';
@@ -20,6 +19,7 @@ part 'utils/grid_view.dart';
 part 'utils/list_view.dart';
 part 'utils/sliver_list.dart';
 part 'utils/shimmer.dart';
+part 'models/paginated_list_model.dart';
 
 typedef PaginationFunctionCallBack<T>
     = Future<Result<PaginatedListModel<T>, Failure>> Function(

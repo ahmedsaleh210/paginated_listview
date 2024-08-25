@@ -6,7 +6,6 @@ Widget _buildGridView<T>({
   required bool shrinkWrap,
   required ScrollController scrollController,
   required SliverGridDelegate gridDelegate,
-  
   Widget Function(Widget)? builder,
   Widget? initialLoader,
   Widget? separator,
@@ -17,7 +16,7 @@ Widget _buildGridView<T>({
   Widget? onEmpty,
   Function(int pageNumber, int maxRows)? onError,
 }) {
-  return BlocBuilder<PaginatedListCubit, PaginatedListState>(
+  return BlocBuilder<PaginatedListCubit<T>, PaginatedListState<T>>(
     builder: (context, state) {
       return CustomScrollView(
         controller: scrollController,

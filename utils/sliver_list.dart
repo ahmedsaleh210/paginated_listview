@@ -14,18 +14,19 @@ Widget _buildSliverList<T>({
   Widget? onEnd,
   Widget? onEmpty,
   Function(int pageNumber, int maxRows)? onError,
+  EdgeInsetsGeometry? padding,
 }) {
-  return BlocBuilder<PaginatedListCubit, PaginatedListState>(
+  return BlocBuilder<PaginatedListCubit<T>, PaginatedListState<T>>(
     builder: (context, state) {
       if (state.listStatus.isLoading) {
         return initialLoader ??
-            SliverList.separated(
-              itemCount: 6,
-              separatorBuilder: (context, index) => 15.szH,
-              itemBuilder: (context, index) => CustomShimmer(
-                height: 100.h,
-              ),
-            );
+            Skeletonizer.sliver(
+                enabled: true,
+                child: SliverList.separated(
+                    itemCount: state.placeholder.length,
+                    separatorBuilder: (context, index) => separator ?? 15.szH,
+                    itemBuilder: (context, index) =>
+                        itemBuilder(context, index, state.placeholder[index])));
       } else if (state.data.isNotEmpty) {
         final Widget child = SliverList.separated(
           separatorBuilder: (context, index) => separator ?? 15.szH,

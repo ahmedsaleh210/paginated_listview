@@ -13,20 +13,24 @@ Widget _buildListView<T>({
   Widget? bottomLoader,
   Widget? onEnd,
   Widget? onEmpty,
+  EdgeInsetsGeometry? padding,
   Function(int pageNumber, int maxRows)? onError,
 }) {
   return BlocBuilder<PaginatedListCubit<T>, PaginatedListState<T>>(
       builder: (context, state) {
     if (state.listStatus.isLoading) {
       return initialLoader ??
-          ListView.separated(
-              itemCount: 6,
-              separatorBuilder: (context, index) => separator ?? 15.szH,
-              itemBuilder: (context, index) => CustomShimmer(
-                    height: 100.h,
-                  ));
+          Skeletonizer(
+              enabled: true,
+              child: ListView.separated(
+                  padding: padding,
+                  itemCount: state.placeholder.length,
+                  separatorBuilder: (context, index) => separator ?? 15.szH,
+                  itemBuilder: (context, index) =>
+                      itemBuilder(context, index, state.placeholder[index])));
     } else if (state.data.isNotEmpty) {
       final Widget child = ListView.separated(
+        padding: padding,
         separatorBuilder: (context, index) =>
             separator ?? const SizedBox.shrink(),
         scrollDirection: scrollDirection ?? Axis.vertical,

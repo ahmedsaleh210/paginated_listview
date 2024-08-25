@@ -28,6 +28,12 @@ class PaginatedListCubit<T> extends Cubit<PaginatedListState<T>> {
     });
   }
 
+  void addItem(T item, int position) {
+    final data = List<T>.from(state.data);
+    data.insert(position, item);
+    emit(state.copyWith(data: data));
+  }
+
   void reset({
     required PaginationFunctionCallBackWithoutParams<T> onPageChanged,
   }) {
@@ -41,21 +47,23 @@ class PaginatedListCubit<T> extends Cubit<PaginatedListState<T>> {
         state.paginationStatus.isLoading) {
       return;
     }
+    emit(state.copyWith(paginationStatus: PaginationStatus.loading));
     final result = await onPageChanged(state.pageNumber, maxRows);
     result.when((success) {
       final data = List<T>.from(state.data)..addAll(success.data);
       emit(state.copyWith(
         pageNumber: state.pageNumber + 1,
         data: data,
-        paginationStatus:
-            success.data.length < maxRows ? PaginationStatus.reachedMax : null,
+        paginationStatus: success.data.length < maxRows
+            ? PaginationStatus.reachedMax
+            : PaginationStatus.success,
       ));
     }, (error) {
       emit(state.copyWith(paginationStatus: PaginationStatus.error));
     });
   }
 
-  void removeItem({required int id, required int Function(T) idGetter}) {
+  void removeItem<D>({required D id, required D Function(T) idGetter}) {
     final data = List<T>.from(state.data)
       ..removeWhere((element) => idGetter(element) == id);
     emit(state.copyWith(data: data));
@@ -69,5 +77,9 @@ class PaginatedListCubit<T> extends Cubit<PaginatedListState<T>> {
       data[index] = item;
       emit(state.copyWith(data: data));
     }
+  }
+
+  int getIndexOfItem({required T item}) {
+    return state.data.indexOf(item);
   }
 }

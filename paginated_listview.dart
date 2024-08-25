@@ -11,6 +11,8 @@ import 'package:multiple_result/multiple_result.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../config/res/assets.gen.dart';
+import 'package:skeletonizer/skeletonizer.dart';
+
 
 part 'cubit/paginated_list_cubit.dart';
 part 'cubit/paginated_list_state.dart';
@@ -52,6 +54,7 @@ class PaginatedListView<T> extends StatelessWidget {
   final SliverGridDelegate? gridDelegate;
   final Axis? scrollDirection;
   final PaginatedListController<T>? controller;
+  final EdgeInsetsGeometry? padding;
 
   const PaginatedListView.fromListView(
       {super.key,
@@ -64,6 +67,7 @@ class PaginatedListView<T> extends StatelessWidget {
       this.initialLoader,
       this.bottomLoader,
       this.onError,
+      this.padding,
       this.onEmpty,
       this.shrinkWrap = false,
       this.initalPageNumber = 1,
@@ -94,6 +98,7 @@ class PaginatedListView<T> extends StatelessWidget {
     this.headers,
   })  : type = PaginatedListType.sliverList,
         gridDelegate = null,
+        padding = null,
         scrollDirection = null;
 
   const PaginatedListView.fromGridView({
@@ -113,6 +118,7 @@ class PaginatedListView<T> extends StatelessWidget {
     this.physics,
     this.builder,
     this.maxRows = 10,
+    this.padding,
     this.headers,
     required this.gridDelegate,
   })  : type = PaginatedListType.gridView,
@@ -135,6 +141,7 @@ class PaginatedListView<T> extends StatelessWidget {
             case PaginatedListType.listview:
               return _PaginatedListView.fromListView(
                 key: controller,
+                padding: padding,
                 itemBuilder: itemBuilder,
                 onPageChanged: onPageChanged,
                 placeholder: placeholder,
@@ -176,6 +183,7 @@ class PaginatedListView<T> extends StatelessWidget {
                 onPageChanged: onPageChanged,
                 placeholder: placeholder,
                 onEnd: onEnd,
+                padding: padding,
                 separator: separator,
                 initialLoader: initialLoader,
                 bottomLoader: bottomLoader,
@@ -215,6 +223,7 @@ class _PaginatedListView<T> extends StatefulWidget {
   final Widget? separator;
   final SliverGridDelegate? gridDelegate;
   final Axis? scrollDirection;
+  final EdgeInsetsGeometry? padding;
 
   const _PaginatedListView.fromListView(
       {super.key,
@@ -231,6 +240,7 @@ class _PaginatedListView<T> extends StatefulWidget {
       this.initalPageNumber = 1,
       this.physics,
       this.builder,
+      this.padding,
       this.maxRows = 10,
       this.headers,
       this.scrollDirection})
@@ -255,6 +265,7 @@ class _PaginatedListView<T> extends StatefulWidget {
     this.headers,
   })  : type = PaginatedListType.sliverList,
         gridDelegate = null,
+        padding = null,
         scrollDirection = null;
 
   const _PaginatedListView.fromGridView({
@@ -273,6 +284,7 @@ class _PaginatedListView<T> extends StatefulWidget {
     this.physics,
     this.builder,
     this.maxRows = 10,
+    this.padding,
     this.headers,
     required this.gridDelegate,
   })  : type = PaginatedListType.gridView,
@@ -296,13 +308,14 @@ class PaginatedListViewImplState<T> extends State<_PaginatedListView<T>> {
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
           scrollController.position.maxScrollExtent * 0.98) {
+        log('teststset');
         _loadMoreData();
       }
     });
   }
 
   Future<void> resetPage({bool? isSearch}) async {
-    context.read<PaginatedListCubit>().reset(
+    context.read<PaginatedListCubit<T>>().reset(
       onPageChanged: () async {
         return await widget.onPageChanged(
             widget.initalPageNumber, widget.maxRows);
@@ -310,11 +323,22 @@ class PaginatedListViewImplState<T> extends State<_PaginatedListView<T>> {
     );
   }
 
-  void removeItem({required int id, required int Function(T) idGetter}) {
+  void removeItem<D>({required D id, required D Function(T) idGetter}) {
     context.read<PaginatedListCubit<T>>().removeItem(
           id: id,
           idGetter: idGetter,
         );
+  }
+
+  void addItem({
+    required T item,
+    required int position,
+  }) {
+    context.read<PaginatedListCubit<T>>().addItem(item, position);
+  }
+
+  int getIndexOfItem(T item) {
+    return context.read<PaginatedListCubit<T>>().getIndexOfItem(item: item);
   }
 
   void updateItem({
@@ -348,6 +372,7 @@ class PaginatedListViewImplState<T> extends State<_PaginatedListView<T>> {
   Widget build(BuildContext context) {
     if (widget.type == PaginatedListType.listview) {
       final Widget child = _buildListView(
+          padding: widget.padding,
           scrollController: scrollController,
           maxRows: widget.maxRows,
           itemBuilder: widget.itemBuilder,
